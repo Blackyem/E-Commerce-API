@@ -6,12 +6,10 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const colors = require("colors");
 
+const orderRoutes = require("./routes/orders");
 
 const app = express();
 dotenv.config();
-
-// For Routes of the project....
-const orderRoutes = require("./routes/orders");
 
 // Mongo Database...
 mongoose.connect(process.env.DB_MONGO, {
@@ -20,31 +18,15 @@ mongoose.connect(process.env.DB_MONGO, {
 });
 
 
-
+app.use(cors());
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({
     extended: false
 }))
-// parse application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+
 
 app.use("/orders", orderRoutes);
-
-
-
-//  CORS Error Configuration....
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-
-    if (req.method === "OPTIONS") {
-        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
-        return res.status(200).json({});
-    }
-    next()
-});
-
-
 
 
 

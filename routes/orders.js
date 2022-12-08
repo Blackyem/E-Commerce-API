@@ -11,14 +11,8 @@
          .then(result => {
              const Obj = {
                  count: result.length,
-                 description: "GET All Orders.",
+                 message: "Orders retrieved successfully.",
                  data: result,
-                 require: {
-                     type: "GET",
-                     url: "localhost:7000/orders/"
-
-                 }
-
              }
              res.status(200).json(Obj)
          })
@@ -31,11 +25,12 @@
 
 
  router.post("/", (req, res, next) => {
+     const { nameOfItem, unitPrice, totalPrice, quantity } = req.body
      const orders = new Order({
-         nameOfItem: req.body.nameOfItem,
-         unitPrice: req.body.unitPrice,
-         totalPrice: req.body.totalPrice,
-         quantity: req.body.quantity
+         nameOfItem,
+         unitPrice,
+         totalPrice,
+         quantity
      });
      orders.save()
          .then(result => {
@@ -43,11 +38,6 @@
              res.status(201).json({
                  message: "Order Created Successfully!!!",
                  data: result,
-                 require: {
-                     type: "POST",
-                     url: "localhost:7000/orders/"
-
-                 }
              });
          })
          .catch(err => {
@@ -63,24 +53,15 @@
      Order.findById(id)
          .exec()
          .then(data => {
-             //  console.log("From Database", data)
-             if (data) {
-                 res.status(200).json({
-                     description: "Get Single Order",
-                     nameOfItem: data.nameOfItem,
-                     unitPrice: data.unitPrice,
-                     totalPrice: data.totalPrice,
-                     quantity: data.quantity,
-                     require: {
-                         type: "GET",
-                         url: "localhost:7000/orders/" + id
-
-                     }
-                 });
-             } else {
-                 res.status(404).json({
-                     Message: "The provided ID is not valid..."
-                 })
+            if (data) {
+            res.status(200).json({
+                 message: "Get Single Order",
+                 data
+           });
+          } else {
+                res.status(404).json({
+                    Message: "The provided ID is not valid..."
+                })
              }
          })
          .catch(err => {
@@ -91,41 +72,27 @@
 
  })
 
-
-
- router.patch("/:ordersId", (req, res, next) => {
-     const id = req.params.ordersId;
-     const updateOps = {};
-     for (const ops of req.body) {
-         updateOps[ops.propNameOfItem] = ops.nameOfItem;
-         updateOps[ops.propUnitPrice] = ops.unitPrice;
-         updateOps[ops.propTotalPrice] = ops.totalPrice;
-         updateOps[ops.propQuantity] = ops.quantity;
-     }
-     Order.updateOne({
-             _id: id
-         }, {
-             $set: updateOps
-         })
-         .exec()
-         .then(result => {
-             //  console.log(result);
-             res.status(200).json({
-                 description: "An Order was Updated Successfully!!",
-                 require: {
-                     type: "UPDATE",
-                     url: "localhost:7000/orders/" + id
-
-                 }
-             })
-         })
-         .catch(err => {
-             console.log(err);
-             res.status(500).json({
-                 error: err
-             })
-         });
- });
+router.patch("/:ordersId", (req, res, next) => {
+    const id = req.params.ordersId; // 1
+    const updateOps = req.body
+    Order.updateOne({ _id: id }, {
+            $set:updateOps
+        })
+        .exec()
+        .then(result => {
+            console.log(result)
+            res.status(200).json({
+                message: "An Order was Updated Successfully!!",
+                data: result
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        });
+});
 
 
  router.delete("/:ordersId", (req, res, next) => {
@@ -136,11 +103,8 @@
          .exec()
          .then(result => {
              res.status(200).json({
-                 description: "One Product Successfully Deleted!!!",
-                 request: {
-                     type: "DELETE",
-                     url: "localhost:2000/orders/" + id
-                 }
+                 message: "One Product Successfully Deleted!!!",
+               
              })
          })
          .catch(err => {
